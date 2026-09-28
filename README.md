@@ -14,12 +14,19 @@ Students: Please run the main.py function in this folder and try to understand h
 - Python 3
 - NumPy
 - Matplotlib
+- ipykernel
 
+Students are encouraged to install Python and learn to use it independently. You may use a different programming language for your work, provided you can implement and explain your solution. It is highly recommended to use VScode to write, run and debug the code for the future FEM practise. 
+
+Step 1: Create a venv, the local environment for you to run the python code. 
+Step 2: Install all the packages to this local environment
 ```sh
-python -m pip install numpy matplotlib
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install ipykernel numpy matplotlib
 ```
 
-Students are encouraged to install Python and learn to use it independently. You may use a different programming language for your work, provided you can implement and explain your solution.
+
 
 The program creates a mesh-specific results folder under `src/FEM1D_linear_bar` containing nodal displacements plus displacement and stress plots.
 
