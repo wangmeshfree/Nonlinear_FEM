@@ -58,4 +58,3 @@ Physical Line("TRACTION_RIGHT") = {7,9};
 Physical Line("TRACTION_TOP") = {10,12};
 
 Mesh 2;
-Save "test.msh";
