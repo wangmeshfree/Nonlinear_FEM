@@ -19,6 +19,7 @@ Students: Please run the main.py function in this folder and try to understand h
 Students are encouraged to install Python and learn to use it independently. You may use a different programming language for your work, provided you can implement and explain your solution. It is highly recommended to use VScode to write, run and debug the code for the future FEM practise. 
 
 Step 1: Create a venv, the local environment for you to run the python code. 
+
 Step 2: Install all the packages to this local environment
 ```sh
 python3 -m venv .venv
