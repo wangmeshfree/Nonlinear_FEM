@@ -6,6 +6,8 @@ This repository contains finite element method examples for MAE 5036. The runnab
 
 [src/FEM1D_linear_bar](src/FEM1D_linear_bar) | Runnable 1D linear-bar FEM program. See its [local guide](src/FEM1D_linear_bar/README.md). 
 
+[src/FEM2D](src/FEM2D) | Shared runnable Q4 FEM program for the cantilever and plate-with-hole examples. See its [local guide](src/FEM2D/README.md).
+
 Students: Please run the main.py function in this folder and try to understand how FEM solves 1 dimensional problem.
 
 
