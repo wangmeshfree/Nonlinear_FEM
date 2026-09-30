@@ -8,6 +8,7 @@ This folder contains one shared Q4 finite-element implementation for both the pl
 | --- | --- |
 | `main.py` | Shared executable entry point. Change `active_problem` to select the example. |
 | `fem2d_lib.py` | Mesh reader, Q4 shape functions, integration, assembly, boundary conditions, postprocessing, and error calculation. |
+| `PROBLEM_SETTINGS_EXAMPLES.md` | Copyable configuration examples and explanations of what each setting changes. |
 | `Inputs/` | LS-DYNA keyword meshes and Gmsh mesh files. |
 
 ## Select a problem
