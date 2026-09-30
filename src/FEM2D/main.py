@@ -9,40 +9,46 @@ import fem2d_lib as fem2d
 
 # 1. Choose the problem and material.
 active_problem = 'Cantilever_beam'
-E = 1.0e3
-nu = 0.30
-number_gauss_points_in_one_direction = 2
 run_convergence_study = True
 
 problem_settings = {
     'Plate_with_hole': {
         'model_characteristics': [1.0, 1.0],  # [hole radius R, tensile load Tx]
-        'mesh_file': 'model_plate_with_hole_level_2.k',
+        'mesh_file': '2d_plate_with_hole/model_plate_with_hole_level_2.k',
         'mesh_files': [
-            'model_plate_with_hole_level_1.k',
-            'model_plate_with_hole_level_2.k',
-            'model_plate_with_hole_level_3.k',
+            '2d_plate_with_hole/model_plate_with_hole_level_1.k',
+            '2d_plate_with_hole/model_plate_with_hole_level_2.k',
+            '2d_plate_with_hole/model_plate_with_hole_level_3.k',
         ],
+        'material_properties': [1.0e3, 0.30],
+        'integration_order': 2,
         'dirichlet': {'FIXED_LEFT': (1, 0), 'FIXED_BOTTOM': (0, 1)},
         'traction': ['TRACTION_RIGHT', 'TRACTION_TOP'],
         'title': 'Plate with Hole',
+        '2d_problem_type': 'plane_strain',
     },
     'Cantilever_beam': {
         'model_characteristics': [10.0, 2.0, 5.0],  # [length L, height H, tip load P]
-        'mesh_file': 'model_cantilever_level_2.k',
+        'mesh_file': '2d_cantilever_beam/model_cantilever_level_2.k',
         'mesh_files': [
-            'model_cantilever_level_1.k',
-            'model_cantilever_level_2.k',
-            'model_cantilever_level_3.k',
+            '2d_cantilever_beam/model_cantilever_level_1.k',
+            '2d_cantilever_beam/model_cantilever_level_2.k',
+            '2d_cantilever_beam/model_cantilever_level_3.k',
         ],
-        'dirichlet': {'FIXED_LEFT': (1, 0)},
+        'material_properties': [1.0e3, 0.30],
+        'integration_order': 2,
+        'dirichlet': {'FIXED_LEFT': (99, 99)},
         'traction': ['TRACTION_RIGHT'],
         'title': 'Cantilever Beam',
+        '2d_problem_type': 'plane_stress',
     },
 }
 
 settings = problem_settings[active_problem]
 model_characteristics = settings['model_characteristics']
+E, nu = settings['material_properties']
+number_gauss_points_in_one_direction = settings['integration_order']
+plane_problem_type = settings['2d_problem_type']
 input_directory = Path(__file__).resolve().parent / 'Inputs'
 output_directory = (
     Path(__file__).resolve().parent
@@ -52,7 +58,7 @@ output_directory.mkdir(exist_ok=True)
 
 
 # 2. Build the constitutive matrix and Gauss rule.
-D_mat = fem2d.get_elasticity_matrix(E, nu, active_problem)
+D_mat = fem2d.get_elasticity_matrix(E, nu, plane_problem_type)
 gauss_points, gauss_weights = fem2d.get_gauss_integration_points(
     number_gauss_points_in_one_direction
 )
@@ -62,8 +68,13 @@ gauss_points, gauss_weights = fem2d.get_gauss_integration_points(
 total_nodes, coords, total_element, elements, boundary_connect, nodeset_list = (
     fem2d.read_lsdyna_k(input_directory / settings['mesh_file'])
 )
-fix_nodes = fem2d.get_fixnodes_from_sets(nodeset_list, settings['dirichlet'])
-fix_nodes = fem2d.add_cantilever_center_constraint(fix_nodes, coords, active_problem)
+fix_nodes = fem2d.get_fixnodes_from_sets(
+    nodeset_list, settings['dirichlet'], coords, model_characteristics,
+    [E, nu], plane_problem_type, active_problem
+)
+fix_nodes = fem2d.add_cantilever_center_constraint(
+    fix_nodes, coords, active_problem, settings['dirichlet']
+)
 traction_elements = fem2d.get_traction_element_indices(
     nodeset_list, settings['traction']
 )
@@ -138,9 +149,12 @@ if run_convergence_study:
         nnode, mesh_coords, nelem, mesh_elements, mesh_boundary, mesh_sets = (
             fem2d.read_lsdyna_k(input_directory / mesh_file)
         )
-        mesh_fix = fem2d.get_fixnodes_from_sets(mesh_sets, settings['dirichlet'])
+        mesh_fix = fem2d.get_fixnodes_from_sets(
+            mesh_sets, settings['dirichlet'], mesh_coords, model_characteristics,
+            [E, nu], plane_problem_type, active_problem
+        )
         mesh_fix = fem2d.add_cantilever_center_constraint(
-            mesh_fix, mesh_coords, active_problem
+            mesh_fix, mesh_coords, active_problem, settings['dirichlet']
         )
         mesh_traction = fem2d.get_traction_element_indices(
             mesh_sets, settings['traction']

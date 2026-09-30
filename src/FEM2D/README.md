@@ -26,7 +26,7 @@ active_problem = 'Plate_with_hole'
 
 Each entry in `problem_settings` supplies the mesh filename, analytical-solution parameters, and the physical-group names used for Dirichlet and traction boundaries.
 
-The plate-with-hole example uses plane strain. The cantilever example uses plane stress, with `u_x=0` on the full left edge and `u_y=0` at the left-edge centre node. The two examples share the same Q4 assembly code; their differences are the analytical field, mesh, parameters, constitutive matrix, and named boundary sets.
+The plate-with-hole example uses plane strain. The cantilever example uses plane stress and applies the analytical two-dimensional displacement field on the left edge using the `(99, 99)` Dirichlet flags. In the boundary-condition flags, `0` means free, `1` means zero displacement, and `99` means analytical displacement. The two examples share the same Q4 assembly code; their differences are the analytical field, mesh, parameters, constitutive matrix, and named boundary sets.
 
 `main.py` contains the same step-by-step workflow as the 1D example: choose a configuration, create the constitutive matrix, read the mesh, assemble and solve one mesh, save the solution, then run the configured mesh-convergence study. `fem2d_lib.py` contains reusable mesh, Q4, assembly, boundary-condition, plotting, and error functions.
 

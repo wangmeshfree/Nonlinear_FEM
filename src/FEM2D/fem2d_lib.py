@@ -101,15 +101,55 @@ def body_force_cantilever_beam(x, y, model_characteristics):
     return np.array([bx, by])
 
 
-def get_elasticity_matrix(E, nu, problem_name):
-    """Use plane stress for the beam and plane strain for the plate."""
+def get_displacement_at_point(
+    x, y, model_characteristics, model_materials, plane_problem_type, problem_name
+):
+    """Return the analytical displacement for the selected benchmark."""
     if problem_name == 'Cantilever_beam':
+        return displacement_cantilever_beam(
+            x, y, model_characteristics, model_materials, plane_problem_type
+        )
+    raise ValueError(
+        f'No analytical displacement field is defined for {problem_name}'
+    )
+
+
+def displacement_cantilever_beam(
+    x, y, model_characteristics, model_materials, plane_problem_type
+):
+    """2-D cantilever displacement solution used for analytical BCs."""
+    beam_length, beam_height, tip_load = model_characteristics[:3]
+    E, nu = model_materials
+    if plane_problem_type == 'plane_stress':
+        E_eff, nu_eff = E, nu
+    elif plane_problem_type == 'plane_strain':
+        E_eff = E / (1.0 - nu**2)
+        nu_eff = nu / (1.0 - nu)
+    else:
+        raise ValueError(f'Unknown plane problem type: {plane_problem_type}')
+
+    second_moment = beam_height**3 / 12.0
+    ux = -tip_load * y / (6.0 * E_eff * second_moment) * (
+        (6.0 * beam_length - 3.0 * x) * x
+        + (2.0 + nu_eff) * (y**2 - beam_height**2 / 4.0)
+    )
+    uy = tip_load / (6.0 * E_eff * second_moment) * (
+        3.0 * nu_eff * y**2 * (beam_length - x)
+        + (4.0 + 5.0 * nu_eff) * beam_height**2 * x / 4.0
+        + (3.0 * beam_length - x) * x**2
+    )
+    return np.array([ux, uy])
+
+
+def get_elasticity_matrix(E, nu, plane_problem_type):
+    """Return the constitutive matrix for plane stress or plane strain."""
+    if plane_problem_type == 'plane_stress':
         return E / (1.0 - nu**2) * np.array([
             [1.0, nu, 0.0],
             [nu, 1.0, 0.0],
             [0.0, 0.0, (1.0 - nu) / 2.0],
         ])
-    if problem_name == 'Plate_with_hole':
+    if plane_problem_type == 'plane_strain':
         mu = E / (2.0 * (1.0 + nu))
         lambda_ = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu))
         return np.array([
@@ -117,7 +157,7 @@ def get_elasticity_matrix(E, nu, problem_name):
             [lambda_, lambda_ + 2.0 * mu, 0.0],
             [0.0, 0.0, mu],
         ])
-    raise ValueError(f'Unknown problem: {problem_name}')
+    raise ValueError(f'Unknown 2-D problem type: {plane_problem_type}')
 
 # ===== Extracted from FEM2D notebook cell 10 =====
 def read_lsdyna_k(filepath):
@@ -227,29 +267,53 @@ def check_set_consistency(nodeset_list, elements, beams):
     return report
 
 
-def get_fixnodes_from_sets(nodeset_list, dirichlet_conditions):
-    """Build the (3, nfix) fixnodes array from named node sets.
+def get_fixnodes_from_sets(
+    nodeset_list, dirichlet_conditions, coords=None, model_characteristics=None,
+    model_materials=None, plane_problem_type=None, problem_name=None
+):
+    """Build (node, component, value) constraints.
 
-    dirichlet_conditions maps a set name to a (flag_x, flag_y) pair, where 1 means
-    the corresponding displacement component is prescribed to zero.
+    Flags are 0 (free), 1 (zero displacement), or 99 (analytical displacement).
     """
     constraints = []
     for name, flags in dirichlet_conditions.items():
         for node in nodeset_list[name]['nodes']:
             for dof_component, flag in enumerate(flags):
-                if flag:
-                    constraints.append([node, dof_component, 0])
+                if flag == 0:
+                    continue
+                if flag == 1:
+                    prescribed_value = 0.0
+                elif flag == 99:
+                    if any(value is None for value in (
+                        coords, model_characteristics, model_materials,
+                        plane_problem_type, problem_name
+                    )):
+                        raise ValueError(
+                            'Analytical displacement constraints require model data.'
+                        )
+                    x, y = coords[node]
+                    prescribed_value = get_displacement_at_point(
+                        x, y, model_characteristics, model_materials,
+                        plane_problem_type, problem_name
+                    )[dof_component]
+                else:
+                    raise ValueError(f'Unknown Dirichlet flag: {flag}')
+                constraints.append([node, dof_component, prescribed_value])
 
-    return np.array(constraints, dtype=int).T
+    return np.array(constraints, dtype=float).T
 
 
-def add_cantilever_center_constraint(fix_nodes, coords, problem_name):
-    """Fix uy at the centre of the beam's left edge; other problems are unchanged."""
+def add_cantilever_center_constraint(
+    fix_nodes, coords, problem_name, dirichlet_conditions
+):
+    """Add the old centre constraint only for zero-value beam BCs."""
     if problem_name != 'Cantilever_beam':
+        return fix_nodes
+    if any(flag == 99 for flags in dirichlet_conditions.values() for flag in flags):
         return fix_nodes
     left_nodes = np.where(np.isclose(coords[:, 0], np.min(coords[:, 0])))[0]
     center_node = left_nodes[np.argmin(np.abs(coords[left_nodes, 1]))]
-    extra = np.array([[center_node], [1], [0]], dtype=int)
+    extra = np.array([[center_node], [1], [0.0]], dtype=float)
     return np.column_stack((fix_nodes, extra))
 
 def get_traction_element_indices(nodeset_list, traction_sets):
@@ -526,6 +590,7 @@ def apply_essential_boundary_conditions(K, F, fixnodes):
         prescribed_value = fixnodes[2, constraint_index]
         dof_index = degrees_of_freedom_per_node * node + dof_component
 
+        F -= K[:, dof_index] * prescribed_value
         K[dof_index, :] = 0.0
         K[:, dof_index] = 0.0
         K[dof_index, dof_index] = 1.0
