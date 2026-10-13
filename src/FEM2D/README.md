@@ -7,11 +7,11 @@
 | 文件 | 作用 | 同学们通常需要修改什么 |
 | --- | --- | --- |
 | `main.py` | 程序入口。选择算例，建立材料矩阵，读取网格，组装刚度与载荷，施加边界条件，求解 `K U = F`，如果问题有解析解，则做收敛分析。 | 修改 `active_problem` 选择要运行的算例；理解这里的求解流程。 |
-| `fem2d_problem_lib.py` | 是求解问题库，里面的 `problem_settings`，集中定义读取哪些网格、材料、高斯积分点数、边界集合、载荷。 | 可以修改现有算例参数，或添加自己的算例，通常被称为Input deck。 |
+| `fem2d_input_decks.py` | 是求解问题库，里面的 `problem_settings`，集中定义读取哪些网格、材料、高斯积分点数、边界集合、载荷。 | 可以修改现有算例参数，或添加自己的算例，通常被称为Input deck。 |
 | `fem2d_exact_solutions.py` | 收集了弹性力学问题的解析解，已有 `PlateWithHole` 和 `CantileverBeam` 两个问题。每个类提供 `displacement(x,y)`、`stress(x,y)`、`body_force(x,y)` 和 `traction(x,y,normal)`。 |
 | `fem2d_lib.py` | 是所有2d有限元程序共用的函数库：网格读取、Q4 形函数、Jacobian、单元积分、整体组装、位移和面力边界处理、应力计算、绘图、误差与收敛分析。 | 学习和实现有限元算法；仅改变算例参数时通常不用修改。 |
 
-文件之间的关系：`main.py` 读取 `fem2d_problem_lib.py` 的配置并调用 `fem2d_lib.py`进行计算；如果问题有解析解，配置中的 `solution` 指向 `fem2d_exact_solutions.py`。`Inputs/` 用于存放已经生成好的网格文件，我们使用Gmsh去生成.k文件让程序进行读取。
+文件之间的关系：`main.py` 读取 `fem2d_input_decks.py` 的配置并调用 `fem2d_lib.py`进行计算；如果问题有解析解，配置中的 `solution` 指向 `fem2d_exact_solutions.py`。`Inputs/` 用于存放已经生成好的网格文件，我们使用Gmsh去生成.k文件让程序进行读取。
 
 ## 2. 安装与运行
 
@@ -34,7 +34,7 @@ active_problem = 'Cantilever_beam'
 # active_problem = 'Beam_with_tip_load'
 ```
 
-名称必须是 `fem2d_problem_lib.py` 中 `problem_settings` 的键。当前三个算例的区别如下；以代码中的最新配置为准。
+名称必须是 `fem2d_input_decks.py` 中 `problem_settings` 的键。当前三个算例的区别如下；以代码中的最新配置为准。
 
 | 算例 | 当前材料假设 | 边界和载荷 | 解析比较 |
 | --- | --- | --- | --- |
@@ -52,7 +52,7 @@ active_problem = 'Cantilever_beam'
 
 ## 4. 配置参数
 
-主要修改 `fem2d_problem_lib.py`：
+主要修改 `fem2d_input_decks.py`：
 
 | 配置项 | 含义 |
 | --- | --- |

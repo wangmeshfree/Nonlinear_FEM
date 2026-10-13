@@ -12,7 +12,7 @@
 from pathlib import Path
 import numpy as np
 import fem2d_lib as fem2d
-from fem2d_problem_lib import problem_settings
+from FEM2D.fem2d_input_decks import problem_settings
 
 
 # Problem settings live in fem2d_problem_lib.py; see PROBLEM_SETTINGS_EXAMPLES.md for templates.
