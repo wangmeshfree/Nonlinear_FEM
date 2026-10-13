@@ -1,3 +1,12 @@
+# ******************************************************************************
+# *                                                                            *
+# *        MAE 5036 - Advanced Computational Solid Mechanics II                *
+# *                                                                            *
+# *                  2D Q4 Finite Element Analysis                             *
+# *                     JIARUI WANG, ZIHAN WANG                                *
+# *                         Copyright (c) 2026                                 *
+# *                                                                            *
+# ******************************************************************************
 from fem2d_exact_solutions import PlateWithHole, CantileverBeam
 
 # dirichlet flags per (u_x, u_y): 0 = free, 1 = prescribed value, 99 = analytical displacement.

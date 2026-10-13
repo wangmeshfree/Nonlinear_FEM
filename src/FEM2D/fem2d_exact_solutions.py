@@ -1,3 +1,14 @@
+# ******************************************************************************
+# *                                                                            *
+# *        MAE 5036 - Advanced Computational Solid Mechanics II                *
+# *                                                                            *
+# *                  2D Q4 Finite Element Analysis                             *
+# *                     JIARUI WANG, ZIHAN WANG                                *
+# *                         Copyright (c) 2026                                 *
+# *                                                                            *
+# ******************************************************************************
+
+
 """Analytical solutions: each class holds its parameters and gives u, sigma, body force, and traction."""
 
 import numpy as np

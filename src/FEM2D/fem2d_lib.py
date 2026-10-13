@@ -1,6 +1,31 @@
+# ******************************************************************************
+# *                                                                            *
+# *        MAE 5036 - Advanced Computational Solid Mechanics II                *
+# *                                                                            *
+# *                  2D Q4 Finite Element Analysis                             *
+# *                     JIARUI WANG, ZIHAN WANG                                *
+# *                         Copyright (c) 2026                                 *
+# *                                                                            *
+# ******************************************************************************
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
+
+
+
+COLORS = [
+    "#0072B2",
+    "#D55E00",
+    "#009E73",
+    "#CC79A7",
+    "#E69F00",
+    "#56B4E9",
+    "#6B7280",
+    "#332288",
+    "#882255",
+    "#44AA99",
+]
+
 
 def get_elasticity_matrix(E, nu, plane_problem_type):
     """Return the constitutive matrix for plane stress or plane strain."""

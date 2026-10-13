@@ -1,4 +1,13 @@
-"""2D Q4 FEM driver: select a problem, solve, plot, and save results."""
+# ******************************************************************************
+# *                                                                            *
+# *        MAE 5036 - Advanced Computational Solid Mechanics II                *
+# *                                                                            *
+# *                  2D Q4 Finite Element Analysis                             *
+# *                     JIARUI WANG, ZIHAN WANG                                *
+# *                         Copyright (c) 2026                                 *
+# *                                                                            *
+# ******************************************************************************
+
 
 from pathlib import Path
 import numpy as np
