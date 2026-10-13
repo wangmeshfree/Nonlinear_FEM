@@ -9,15 +9,8 @@
 # ******************************************************************************
 from fem2d_exact_solutions import PlateWithHole, CantileverBeam
 
-# dirichlet flags per (u_x, u_y): 0 = free, 1 = prescribed value, 99 = analytical displacement.
-# 'dirichlet_values' (optional) gives the (u_x, u_y) values for flag 1 per set; default 0.
+# Boundary flags per (u_x, u_y): 0 = free, 1 = prescribed value, 99 = analytical.
 
-# A new analytical problem also needs a class in fem2d_exact_solutions.py.
-# 'traction' flags per set and (t_x, t_y): 0 = none, 1 = value from 'traction_values' (default 0),
-
-# 99 = analytical traction. 'body_force' (bx, by) is read only without 'solution' (default 0);
-# with a solution it comes from the solution class. Without 'solution', flag 99 and the
-# convergence study are unavailable.
 problem_settings = {
 
     # Problem 1: plate with a hole
